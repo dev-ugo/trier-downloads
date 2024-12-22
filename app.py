@@ -15,9 +15,7 @@ def trier_dossier(downloads_folder):
     }
 
     # Créer les sous-dossiers si nécessaire
-    for category in file_categories.keys():
-        folder_path = os.path.join(downloads_folder, category)
-        os.makedirs(folder_path, exist_ok=True)
+    created_folders = set()
 
     # Trier les fichiers
     for item in os.listdir(downloads_folder):
@@ -32,12 +30,18 @@ def trier_dossier(downloads_folder):
         moved = False
         for category, extensions in file_categories.items():
             if file_ext in extensions:
+                if category not in created_folders:
+                    os.makedirs(os.path.join(downloads_folder, category), exist_ok=True)
+                    created_folders.add(category)
                 shutil.move(item_path, os.path.join(downloads_folder, category, item))
                 moved = True
                 break
 
         # Si aucune catégorie trouvée, déplacer dans "Divers"
         if not moved:
+            if "Divers" not in created_folders:
+                os.makedirs(os.path.join(downloads_folder, "Divers"), exist_ok=True)
+                created_folders.add("Divers")
             shutil.move(item_path, os.path.join(downloads_folder, "Divers", item))
 
     print(f"Trier les fichiers dans '{downloads_folder}' est terminé !")
